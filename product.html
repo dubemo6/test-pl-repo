@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Object with Text</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            overflow-x: hidden; /* Prevent horizontal overflow */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh; /* Use min-height to allow content to push body height */
+            background-color: #f2f2f2; /* Changed to #f2f2f2 */
+        }
+
+        /* --- NAVBAR STYLES --- */
+        header {
+            background-color: #f2f2f2; /* Changed to #f2f2f2 */
+            padding: 3rem 0; /* Adjusted: Reduced padding to bring it closer */
+            border-bottom: 1px solid white; /* Added thin line separator, changed to white */
+            box-shadow: none; /* No shadow as per image */
+            position: relative; /* Changed to relative to allow scrolling past it */
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .main-nav {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .main-nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .main-nav ul li a {
+            color: #333; /* Dark text color */
+            text-decoration: none;
+            font-weight: 400;
+            padding: 0.5rem 0;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .main-nav ul li a:hover {
+            color: #f97316; /* Orange hover color */
+        }
+
+        .main-nav ul li a.active::after {
+            content: '';
+            position: absolute;
+            width: 100%; /* Underline for active link */
+            height: 2px;
+            background: #f97316; /* Orange underline */
+            left: 0;
+            bottom: -5px;
+            transition: width 0.3s ease;
+        }
+
+        .call-now-text {
+            background-color: transparent;
+            color: #333; /* Dark text color */
+            padding: 0;
+            text-decoration: none;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+
+        .call-now-text:hover {
+            color: #f97316; /* Orange hover color */
+        }
+
+        .hamburger-btn {
+            display: none; /* Hidden by default on desktop */
+            background: none;
+            border: none;
+            color: #333; /* Dark icon color */
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* Mobile Menu Overlay */
+        .mobile-menu-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(200, 200, 200, 0.95); /* Semi-transparent light grey */
+            z-index: 2000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+            opacity: 0; /* Start hidden for transition */
+            pointer-events: none; /* Disable interaction when hidden */
+            overflow-y: auto;
+        }
+
+        .mobile-menu-overlay.active {
+            display: flex; /* Show when active */
+            opacity: 1; /* Fade in */
+            pointer-events: auto; /* Enable interaction */
+        }
+
+        .mobile-menu-overlay .close-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            color: #333; /* Dark icon color */
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        .mobile-menu-overlay nav ul {
+            list-style: none;
+            padding: 0;
+            text-align: center;
+        }
+
+        .mobile-menu-overlay nav ul li {
+            margin-bottom: 2rem;
+        }
+
+        .mobile-menu-overlay nav ul li a {
+            color: #333; /* Dark text color */
+            text-decoration: none;
+            font-size: 2.2rem;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .mobile-menu-overlay nav ul li a:hover {
+            color: #f97316; /* Orange hover color */
+        }
+
+        /* --- END NAVBAR STYLES --- */
+
+        /* --- NEW HERO SECTION STYLES --- */
+        #hero-section {
+            width: 100%;
+            padding: 8px 0; /* Adjusted: Reduced padding to move even closer to navbar */
+            background-color: #f2f2f2; /* Changed to #f2f2f2 */
+            text-align: center;
+            color: #333;
+            margin-top: 0; /* Removed margin-top as navbar is no longer fixed */
+            box-sizing: border-box; /* Include padding in width */
+            position: relative; /* Needed for positioning the absolute image */
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px; /* Add padding to the text content instead */
+        }
+
+        .hero-content h1 {
+            font-size: 3rem; /* Large heading */
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem; /* Paragraph text */
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+
+        .hero-full-width-image {
+            width: 100vw; /* Take full viewport width */
+            position: relative; /* Use relative positioning to allow negative margins */
+            left: 50%;
+            transform: translateX(-50%); /* Center the 100vw element */
+            height: auto;
+            display: block; /* Remove extra space below image */
+            margin-top: 20px; /* Space between text and image */
+            border-radius: 0; /* Remove rounded corners for full width */
+            box-shadow: none; /* Remove shadow for full width */
+        }
+        /* --- END NEW HERO SECTION STYLES --- */
+
+        /* New Section for "Tailored Construction Solutions" */
+        #tailored-solutions-section {
+            width: 100%;
+            background-color: #f2f2f2; /* Changed to #f2f2f2 */
+            padding: 50px 20px;
+            box-sizing: border-box;
+            text-align: left; /* Align text to the left */
+            color: #333;
+            max-width: 1200px; /* Max width to match other sections */
+            margin: 20px auto; /* Center the section with some margin */
+        }
+
+        #tailored-solutions-section h2 {
+            font-size: 2.5rem; /* Large font size */
+            font-weight: 700; /* Bold font weight */
+            line-height: 1.2;
+            margin: 0; /* Remove default margin */
+            padding: 0 20px; /* Add some padding for text content */
+        }
+
+        /* Main Content Styles */
+        #main-content {
+            display: flex;
+            flex-direction: row; /* Ensure row direction for left/right layout */
+            align-items: center;
+            height: calc(100vh - 200px); /* Adjusted height for hero section, no longer considering fixed navbar */
+            width: 100%;
+            /* The height calculation for main-content might need fine-tuning based on actual hero-section height */
+        }
+        #scene-container {
+            width: 40%; /* Occupy 40% of width for 3D scene on the left */
+            height: 100%;
+            background-color: #f2f2f2; /* Changed to #f2f2f2 */
+            display: flex;
+            justify-content: center; /* Center the 3D model within its container */
+            align-items: center;
+            position: relative; /* Important for absolute positioning of overlay text */
+        }
+
+        #text-container {
+            width: 60%; /* Occupy 60% of width for text on the right */
+            height: 100%;
+            display: flex;
+            flex-direction: column; /* Stack text content vertically */
+            justify-content: center;
+            align-items: flex-start; /* Align text to the left */
+            padding: 20px 50px; /* Add padding for text content */
+            font-size: 18px; /* Adjust font size */
+            color: #333;
+            text-align: left;
+            background-color: #f2f2f2; /* Changed to #f2f2f2 */
+            gap: 20px;
+        }
+
+        #text-container h1 {
+            font-size: 2.2rem; /* Larger heading */
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        #text-container p {
+            font-size: 1.1rem; /* Paragraph text size */
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .place-order-btn {
+            background-color: #4a4a4a; /* Dark grey button */
+            color: #fff;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 9999px; /* Fully rounded corners */
+            transition: background-color 0.3s ease;
+            white-space: nowrap;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .place-order-btn:hover {
+            background-color: #222;
+        }
+
+        .tagline {
+            font-style: italic;
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 1.5rem;
+        }
+
+        /* New section below main-content */
+        #engineered-section {
+            width: 100%;
+            background-color: #f2f2f2; /* Changed to #f2f2f2 */
+            padding: 50px 20px;
+            display: flex;
+            flex-direction: row; /* Default to row for desktop */
+            align-items: center;
+            justify-content: space-between; /* Distribute space between items */
+            gap: 40px; /* Space between image and text */
+            box-sizing: border-box;
+        }
+
+        .engineered-image-container {
+            flex: 0 0 40%; /* Flex-grow: 0, flex-shrink: 0, flex-basis: 40% */
+            display: flex;
+            justify-content: flex-start; /* Align image to the left within its container */
+            align-items: center;
+            max-width: 40%; /* Ensure it doesn't grow beyond 40% */
+        }
+
+        .engineered-image-container img {
+            max-width: 100%; /* Ensure image fits within its container */
+            height: auto;
+            border-radius: 8px; /* Rounded corners for the image */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .engineered-content {
+            flex: 0 0 55%; /* Flex-grow: 0, flex-shrink: 0, flex-basis: 55% (leaving 5% for gap/padding) */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* Align text to the left */
+            text-align: left;
+            color: #333;
+            max-width: 55%; /* Limit content width */
+        }
+
+        .engineered-content h2 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .engineered-button {
+            background-color: #4a4a4a; /* Dark grey button */
+            color: #fff;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 9999px; /* Fully rounded corners */
+            transition: background-color 0.3s ease;
+            white-space: nowrap;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .engineered-button:hover {
+            background-color: #222;
+        }
+
+        /* Footer Styling */
+        footer {
+            background-color: #333; /* Dark gray background as per image */
+            color: white;
+            padding: 20px 20px; /* Adjusted: Increased vertical padding to increase height */
+            margin-top: auto; /* Pushes footer to the bottom */
+            width: 100%; /* Ensure footer takes full width */
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            justify-content: space-between;
+            align-items: flex-start; /* Align items to the top */
+            gap: 10px; /* Reduced space between columns */
+        }
+
+        .footer-left,
+        .footer-center,
+        .footer-right {
+            flex: 1; /* Distribute space */
+            min-width: 250px; /* Minimum width for columns before wrapping */
+            text-align: left;
+        }
+
+        .footer-left {
+            display: flex;
+            flex-direction: column;
+            gap: 5px; /* Reduced gap */
+        }
+
+        .footer-left .company-name-large {
+            font-size: 1em; /* Slightly smaller font size */
+            font-weight: 700;
+            margin-bottom: 5px; /* Reduced margin */
+        }
+
+        .footer-left a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.8em; /* Slightly smaller font size */
+            transition: color 0.3s ease;
+        }
+
+        .footer-left a:hover {
+            color: #f97316; /* Orange on hover */
+        }
+
+        .footer-center {
+            display: flex;
+            flex-direction: column;
+            gap: 5px; /* Reduced gap */
+        }
+
+        .footer-center p,
+        .footer-center a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.8em; /* Slightly smaller font size */
+            line-height: 1.2; /* Reduced line height */
+        }
+
+        .footer-center a:hover {
+            color: #f97316;
+        }
+
+        .footer-social-icons {
+            display: flex;
+            gap: 10px; /* Reduced gap */
+            margin-top: 10px; /* Reduced margin */
+        }
+
+        .footer-social-icons a {
+            color: white;
+            font-size: 1em; /* Slightly smaller icon size */
+            transition: color 0.3s ease;
+        }
+
+        .footer-social-icons a:hover {
+            color: #f97316;
+        }
+
+        .footer-right {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px; /* Reduced gap */
+        }
+
+        .footer-right .footer-logo-box {
+            background-color: white; /* White background for logo box */
+            padding: 5px 10px; /* Reduced padding */
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .footer-right .footer-logo-box img {
+            width: 60px; /* Reduced size as needed */
+            height: auto;
+            display: block;
+            margin: 0 auto 2px auto; /* Reduced margin */
+        }
+
+        .footer-right .footer-logo-box .main-text {
+            font-size: 1rem; /* Reduced font size */
+            font-weight: 700;
+            color: #333;
+            line-height: 1;
+        }
+
+        .footer-right .footer-logo-box .sub-text {
+            font-size: 0.6rem; /* Reduced font size */
+            color: #555;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .footer-copyright {
+            width: 100%;
+            text-align: left; /* Align copyright text to the left */
+            font-size: 0.75rem; /* Reduced font size */
+            margin-top: 10px; /* Reduced space above copyright */
+            border-top: 1px solid rgba(255, 255, 255, 0.2); /* Separator line */
+            padding-top: 10px; /* Reduced padding */
+        }
+
+        /* Scroll Reveal Styles */
+        .scroll-reveal-text {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .scroll-reveal-text.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Media queries for responsiveness */
+        @media (min-width: 1024px) { /* Breakpoint for desktop navigation */
+            .hamburger-btn {
+                display: none; /* Hide hamburger on desktop */
+            }
+
+            .main-nav {
+                display: flex; /* Show main nav on desktop */
+            }
+
+            .navbar-container {
+                flex-wrap: nowrap; /* Prevent wrapping on desktop */
+            }
+
+            /* Force hide mobile menu overlay on desktop */
+            .mobile-menu-overlay {
+                display: none !important;
+            }
+
+            /* Adjust hero image to be full width on desktop */
+            .hero-full-width-image {
+                max-width: 100vw; /* Ensure image is full width */
+                width: 100vw; /* Explicitly set width to 100% */
+                height: auto; /* Maintain aspect ratio */
+            }
+
+            /* Adjust heights for main-content on desktop */
+            #main-content {
+                justify-content: flex-start; /* Align content to the start (left) */
+                margin-top: 0; /* Reset margin-top for main-content on desktop as hero handles spacing */
+                height: calc(100vh - 200px); /* Re-calculate based on hero height */
+            }
+            #scene-container {
+                width: 40%; /* Occupy 40% of width for 3D scene on the left */
+                justify-content: center; /* Center the 3D model within its smaller container */
+                padding-left: 0; /* Remove specific left padding, let flexbox handle it */
+            }
+            #text-container {
+                width: 60%; /* Occupy 60% of width for text on the right */
+                padding-left: 50px; /* Adjust padding for better separation from 3D model */
+                padding-right: 50px; /* Add right padding */
+            }
+            #engineered-section {
+                padding: 80px 50px; /* More padding on desktop */
+            }
+            .footer-container {
+                flex-direction: row;
+                text-align: left;
+            }
+
+            .footer-left {
+                flex-basis: 30%; /* Adjust width for left column */
+            }
+
+            .footer-center {
+                flex-basis: 40%; /* Adjust width for center column */
+                text-align: center; /* Center content in the middle column */
+                align-items: center; /* Center items in the middle column */
+            }
+
+            .footer-right {
+                flex-basis: 30%; /* Adjust width for right column */
+                align-items: flex-end; /* Align logo to the right */
+            }
+        }
+
+        @media (max-width: 1023px) { /* Apply these styles on screens smaller than 1024px */
+            .main-nav, .call-now-text {
+                display: none; /* Hide desktop nav and call button on mobile */
+            }
+            .hamburger-btn {
+                display: block; /* Show hamburger on mobile */
+            }
+            
+            #hero-section {
+                padding: 10px 20px 20px; /* Adjusted: Reduced padding for mobile */
+                margin-top: 0; /* Removed margin-top as navbar is no longer fixed */
+            }
+            .hero-content h1 {
+                font-size: 2rem; /* Smaller heading on mobile */
+            }
+            .hero-content p {
+                font-size: 1rem; /* Smaller paragraph on mobile */
+            }
+
+            #main-content {
+                flex-direction: column; /* Stack content vertically on smaller screens */
+                height: auto; /* Auto height for stacked content */
+                margin-top: 0; /* Reset margin-top for main-content on mobile */
+            }
+            #scene-container {
+                width: 100%; /* Full width for 3D scene */
+                height: 50vh; /* Adjust height for 3D scene on mobile */
+                padding-left: 0; /* Reset padding for mobile */
+                justify-content: center; /* Center content for mobile */
+            }
+            #tailored-solutions-section h2 {
+                font-size: 1.8rem; /* Smaller on mobile */
+                padding: 0 10px; /* Adjust padding for mobile */
+                text-align: center; /* Center on mobile for better readability */
+            }
+            #text-container {
+                width: 100%; /* Full width for text container on mobile */
+                padding: 20px; /* Adjust padding for mobile */
+                align-items: center; /* Center text content when stacked */
+                text-align: center;
+            }
+            #text-container h1 {
+                font-size: 1.8rem; /* Smaller heading on mobile */
+            }
+            #text-container p {
+                font-size: 1rem; /* Smaller paragraph on mobile */
+            }
+            #engineered-section {
+                flex-direction: column; /* Stack vertically on mobile */
+                padding: 30px 20px; /* Adjust padding for mobile */
+            }
+            .engineered-image-container {
+                max-width: 100%; /* Full width on mobile */
+                flex-basis: auto; /* Reset flex-basis */
+                justify-content: center; /* Center image on mobile */
+            }
+            .engineered-content {
+                align-items: center; /* Center text content on mobile */
+                text-align: center;
+                max-width: 100%; /* Full width on mobile */
+                flex-basis: auto; /* Reset flex-basis */
+            }
+            .engineered-content h2 {
+                font-size: 2.2rem; /* Smaller heading on mobile */
+            }
+           
+        }
+
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.139.0/build/three.module.js",
+                "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.139.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <div class="navbar-container">
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="product.html">Products</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+            <a href="tel:123-456-7890" class="call-now-text">Call Us Anytime 123-456-7890</a>
+            <button class="hamburger-btn" aria-label="Toggle Navigation">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.5em; height: 1.5em;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="mobile-menu-overlay">
+        <button class="close-btn" aria-label="Close Navigation">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.5em; height: 1.5em;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="product.html">Products</a></li>
+                <li><a href="about.html">About Us</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="tel:123-456-7890">Call Us Anytime 123-456-7890</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <section id="hero-section">
+        <div class="hero-content">
+            <h1>Construction of Block Bricks</h1>
+            <p>Oneco Construction is your premier choice for construction projects, specialising in the meticulous construction of block bricks. Our team is dedicated to providing tailored building solutions that align with your vision and budget. With a skilled workforce, we guarantee top-notch workmanship on every project.</p>
+        </div>
+        <img src="images/316c42f5024b486da473f3ca84f714ec.webp" alt="Building Bricks" class="hero-full-width-image">
+    </section>
+
+    <section id="tailored-solutions-section">
+        <h2>Tailored Construction Solutions</h2>
+    </section>
+
+    <div id="main-content">
+        <div id="scene-container">
+            </div>
+        <div id="text-container">
+            <h1>We specialise in 6" and 9" hollow blocks - engineered for durability, precision, and performance.</h1>
+            <p>Whether you're building homes, commercial properties, or roadways, our blocks are designed to meet the highest construction standards. With reliable service, competitive pricing, and nationwide delivery, we're your dependable partner in building strong.</p>
+          <a href="contact.html"> <button class="place-order-btn">Place an Order</button></a>
+            <p class="tagline">"Building Strong Foundations, One Block at a Time"</p>
+        </div>
+    </div>
+
+    <section id="engineered-section">
+        <div class="engineered-image-container">
+            <img src="images/Screenshot 2025-05-29 045522.png" alt="Construction Mixer">
+        </div>
+        <div class="engineered-content">
+            <h2 class="scroll-reveal-text">Engineered for your Project</h2>
+           <a href="contact.html"> <button class="engineered-button scroll-reveal-text">Get in Touch</button></a>
+        </div>
+    </section>
+
+    <footer style="background-color: #333; color: white; padding: 20px 20px; box-sizing: border-box; width: 100%;">
+        <div class="footer-content" style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 10px;">
+            <div class="footer-column company-info" style="flex: 1.5; min-width: 150px; text-align: left;">
+                <h4 class="scroll-reveal-text">Oneco Construction<br>Enterprises</h4>
+                <p class="scroll-reveal-text" style="margin-bottom: 3px; font-size: 0.8em; line-height: 1.3;"><a href="#" style="color: white; text-decoration: none; transition: color 0.3s ease;">Privacy Policy</a></p>
+                <p class="scroll-reveal-text" style="margin-bottom: 3px; font-size: 0.8em; line-height: 1.3;"><a href="#" style="color: white; text-decoration: none; transition: color 0.3s ease;">Accessibility Statement</a></p>
+            </div>
+            <div class="footer-column contact-details" style="flex: 2; min-width: 150px; text-align: left;">
+                <div class="contact-info">
+                    <p class="scroll-reveal-text" style="margin-bottom: 3px; font-size: 0.8em; line-height: 1.3;">123-456-7890</p>
+                    <p class="scroll-reveal-text" style="margin-bottom: 3px; font-size: 0.8em; line-height: 1.3;">oneco.exec@gmail.com</p>
+                    <p class="scroll-reveal-text" style="margin-bottom: 3px; font-size: 0.8em; line-height: 1.3;">14/17 Lateef Eletu, Off Olowu Eletu Street, Container Bus-Stop, Awoyaya, Lagos</p>
+                </div>
+                <div class="social-icons" style="margin-top: 8px; display: flex; gap: 5px;">
+                    <a href="#" aria-label="LinkedIn" style="color: white; font-size: 1em; transition: color 0.3s ease;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.761 0 5-2.239 5-5v-14c0-2.761-2.239-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                        </svg>
+                    </a>
+                    <a href="#" aria-label="Facebook" style="color: white; font-size: 1em; transition: color 0.3s ease;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4c0-1.667.671-2 1.667-2h2.333v-3h-3.192c-3.543 0-5.808 2.198-5.808 5.658v2.342z"/>
+                        </svg>
+                    </a>
+                    <a href="#" aria-label="Twitter" style="color: white; font-size: 1em; transition: color 0.3s ease;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.403 0-6.165 2.762-6.165 6.165 0 .485.055.96.162 1.41-.513-.025-1.028-.09-1.538-.195-4.288-2.149-7.177-5.719-9.435-9.987-.44.75-.694 1.624-.694 2.553 0 1.792.91 3.375 2.292 4.316-.844-.025-1.63-.26-2.32-.64v.079c0 2.98 2.122 5.464 4.937 6.03-.518.14-1.06.215-1.616.215-.397 0-.785-.038-1.166-.11 1.242 3.88 4.855 6.702 9.133 6.702-2.115 1.664-4.782 2.651-7.698 2.651-1.005 0-1.996-.059-2.96-.172.032.934.192 1.847.485 2.71-.027-.001-.053-.002-.08-.002-.68 0-1.34-.055-1.987-.162-.002-.001-.004-.002-.006-.003"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-column logo-column" style="flex: 0.5; min-width: 150px; text-align: left; display: flex; justify-content: flex-end;">
+                <img src="images/Screenshot 2025-05-26 224232.png" alt="ONECO Logo" class="footer-logo" style="max-width: 150px; height: auto; display: block;">
+            </div>
+        </div>
+        </footer>
+    <script type="module">
+        // --- Import Three.js modules at the top level ---
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+        // Ensure all other JavaScript runs after the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Scene Setup ---
+            const scene = new THREE.Scene();
+            const container = document.getElementById('scene-container');
+            
+            // Set up camera
+            const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            
+            // Set up renderer
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // alpha: true for transparent background
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            
+            // Only initialize and append renderer if container exists
+            if (container) {
+                container.appendChild(renderer.domElement);
+                renderer.setClearColor(0xf2f2f2); // Changed to #f2f2f2
+
+                // Position camera
+                camera.position.set(0, 0.2, 0.5); /* Adjusted camera position to be closer to the object for more zoom */
+                camera.lookAt(scene.position);
+
+                // Lighting
+                const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+                scene.add(ambientLight);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+                directionalLight.position.set(1, 1, 2);
+                scene.add(directionalLight);
+
+                // Load 3D model
+                const gltfloader = new GLTFLoader();
+                let brick;
+                // Using the local path for the GLB model as requested.
+                gltfloader.load('./models/brick.glb', 
+                    (gltf) => {
+                        brick = gltf.scene;
+                        const boundingBox = new THREE.Box3().setFromObject(brick);
+                        const center = new THREE.Vector3();
+                        boundingBox.getCenter(center);
+                        brick.position.x = -center.x;
+                        brick.position.y = -center.y;
+                        brick.position.z = -center.z;
+
+                        scene.add(brick);
+
+                        const controls = new OrbitControls(camera, renderer.domElement);
+                        controls.enableDamping = true;
+                        controls.dampingFactor = 0.1;
+                        controls.enableZoom = false; /* Set to false to disable zoom */
+                        controls.enablePan = false; /* Optionally disable panning as well for a fixed view */
+                        controls.enableRotate = true; /* Keep rotation enabled if desired */
+                        controls.target.set(0, 0, 0);
+                        controls.minDistance = 0.3; /* Adjusted minimum zoom distance */
+                        controls.maxDistance = 1.0; /* Adjusted maximum zoom distance */
+                        controls.update();
+
+                        function animate() {
+                            requestAnimationFrame(animate);
+                            if (brick) {
+                                brick.rotation.y += 0.01;
+                                brick.rotation.x += 0.01;
+                            }
+                            controls.update();
+                            renderer.render(scene, camera);
+                        }
+
+                        animate();
+                        // Call updateRendererSize after the model is loaded and the scene is set up
+                        // This ensures the renderer is sized correctly based on the container's final dimensions
+                        updateRendererSize(); 
+
+                        // --- Handle Resizing ---
+                        function updateRendererSize() {
+                            const containerWidth = container.offsetWidth;
+                            const containerHeight = container.offsetHeight;
+
+                            camera.aspect = containerWidth / containerHeight;
+                            camera.updateProjectionMatrix();
+                            renderer.setSize(containerWidth, containerHeight);
+                        }
+                        window.addEventListener('resize', updateRendererSize, false);
+                    },
+                    (xhr) => {
+                        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+                    },
+                    (error) => {
+                        console.error('Failed to load model:', error);
+                        const errorDiv = document.createElement('div');
+                        errorDiv.style.position = 'absolute';
+                        errorDiv.style.top = '50%';
+                        errorDiv.style.left = '50%';
+                        errorDiv.style.transform = 'translate(-50%, -50%)';
+                        errorDiv.style.backgroundColor = 'red';
+                        errorDiv.style.color = 'white';
+                        errorDiv.style.padding = '20px';
+                        errorDiv.style.zIndex = '1000';
+                        errorDiv.textContent = 'Failed to load 3D model. Check the console for details.';
+                        container.appendChild(errorDiv);
+                    }
+                );
+            } else {
+                console.warn("Scene container not found. 3D model rendering will be skipped.");
+            }
+
+            // --- Mobile Menu JavaScript ---
+            const hamburgerBtn = document.querySelector(".hamburger-btn");
+            const mobileMenuOverlay = document.querySelector(".mobile-menu-overlay");
+            const closeMenuBtn = document.querySelector(".mobile-menu-overlay .close-btn");
+            const mobileMenuLinks = mobileMenuOverlay.querySelectorAll("a");
+
+            function toggleMobileMenu() {
+                mobileMenuOverlay.classList.toggle("active");
+                document.body.style.overflow = mobileMenuOverlay.classList.contains("active") ? "hidden" : "";
+            }
+
+            // Check if elements exist before adding event listeners
+            if (hamburgerBtn) {
+                hamburgerBtn.addEventListener("click", toggleMobileMenu);
+            }
+            if (closeMenuBtn) {
+                closeMenuBtn.addEventListener("click", toggleMobileMenu);
+            }
+
+            mobileMenuLinks.forEach(link => {
+                link.addEventListener("click", toggleMobileMenu);
+            });
+
+            // Close mobile menu when clicking outside of it (but not on the hamburger button itself)
+            document.addEventListener('click', (event) => {
+                if (mobileMenuOverlay.classList.contains('active') &&
+                    !mobileMenuOverlay.contains(event.target) &&
+                    hamburgerBtn && !hamburgerBtn.contains(event.target)) { // Added null check for hamburgerBtn
+                    toggleMobileMenu();
+                }
+            });
+
+            // Close mobile menu if resized to desktop view
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 1024) { // Changed breakpoint to 1024px to match CSS
+                    mobileMenuOverlay.classList.remove('active');
+                    document.body.style.overflow = ''; // Ensure scrolling is re-enabled
+                }
+            });
+
+            // --- Scroll Reveal JavaScript ---
+            const scrollRevealElements = document.querySelectorAll('.scroll-reveal-text');
+
+            const observerOptions = {
+                root: null, // Use the viewport as the root
+                rootMargin: '0px',
+                threshold: 0.1 // Trigger when 10% of the element is visible
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                        observer.unobserve(entry.target); // Stop observing once revealed
+                    }
+                });
+            }, observerOptions);
+
+            scrollRevealElements.forEach(element => {
+                observer.observe(element);
+            });
+        }); // End DOMContentLoaded listener
+    </script>
+</body>
+</html>
